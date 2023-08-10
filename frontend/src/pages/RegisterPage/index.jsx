@@ -1,5 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { registerUser } from "../../store/thunkFunctions";
 export default function RegisterPage() {
   const {
     register,
@@ -8,8 +10,18 @@ export default function RegisterPage() {
     reset,
   } = useForm({ mode: "onChange" });
 
+  const dispatch = useDispatch();
+
   const onSubmit = ({ email, password, name }) => {
     // 페이지에서 입력 한 값
+    const body = {
+      email: email,
+      password: password,
+      name: name,
+      image: `https://via.placeholder.com/600x400?text=no+user+image`,
+    };
+
+    dispatch(registerUser(body));
     reset(); //react-hook-form으로 입력후 입력값 초기화
   };
 
