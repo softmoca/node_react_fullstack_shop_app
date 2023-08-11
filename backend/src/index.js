@@ -2,11 +2,13 @@ const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
 const cors = require("cors");
+const app = express();
+const port = 4000;
 const dotenv = require("dotenv");
 dotenv.config();
 
-const app = express();
-const port = 4000;
+app.use(cors());
+app.use(express.json());
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -17,14 +19,12 @@ mongoose
     console.error(err);
   });
 
-app.use(cors());
+app.use("/users", require("./routes/users"));
 
-app.get("/", (req, res) => {
-  res.send("gd");
-});
+app.use(express.static(path.join(__dirname, "../uploads")));
 
 app.use((error, req, res, next) => {
-  res.status(err.status || 500);
+  res.status(error.status || 500);
   res.send(error.message || "서버에서 에러가 났습니다.");
 });
 
