@@ -17,3 +17,17 @@ export const registerUser = createAsyncThunk(
     } //rejectWithValue에 string 을 넣어주면    action의 Payload(state에 전달하는 값)가 된다.
   }
 );
+
+export const loginUser = createAsyncThunk(
+  "user/loginUser",
+  async (body, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(`/users/login`, body); //이메일과 패스워드가 body에 있다
+
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return thunkAPI.rejectWithValue(error.response.data || error.message);
+    }
+  }
+);
