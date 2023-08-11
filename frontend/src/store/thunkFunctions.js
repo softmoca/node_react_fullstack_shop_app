@@ -27,7 +27,24 @@ export const loginUser = createAsyncThunk(
       return response.data;
     } catch (error) {
       console.log(error);
-      return thunkAPI.rejectWithValue(error.response.data || error.message);
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const authUser = createAsyncThunk(
+  "user/authUser",
+  async (_, thunkAPI) => {
+    try {
+      console.log("aaa");
+      const response = await axiosInstance.get(
+        `/users/auth` //백엔드 api url
+      );
+
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );

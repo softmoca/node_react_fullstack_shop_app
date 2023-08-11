@@ -1,4 +1,4 @@
-import { Outlet, Route, Routes } from "react-router-dom";
+import { Outlet, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import Navbar from "./layout/NavBar";
 import LandingPage from "./pages/LandingPage";
@@ -7,6 +7,9 @@ import RegisterPage from "./pages/RegisterPage";
 import Footer from "./layout/Footer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { authUser } from "./store/thunkFunctions";
 
 function Layout() {
   return (
@@ -27,6 +30,16 @@ function Layout() {
 }
 
 function App() {
+  const dispatch = useDispatch();
+  const isAuth = useSelector((state) => state.user?.isAuth); // 전체 state 를 가져오기
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (isAuth) {
+      dispatch(authUser()); //thucnk 함수 이름은 authUser
+    }
+  }, [isAuth, pathname, dispatch]); // 권한이 바뀌거나 or url경로가 바뀌거나
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
