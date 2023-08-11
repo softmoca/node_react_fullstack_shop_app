@@ -12,8 +12,8 @@ export const registerUser = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      console.log(error);
-      return thunkAPI.rejectWithValue(error.response.data || error.message);
+      console.log(error.message);
+      return thunkAPI.rejectWithValue(error.message);
     } //rejectWithValue에 string 을 넣어주면    action의 Payload(state에 전달하는 값)가 된다.
   }
 );
