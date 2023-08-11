@@ -33,6 +33,11 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.methods.comparePassword = async function (plainPassword) {
+  let user = this; //user.password는 DB에 있는 해쉬된 비밀번호
+  const match = await bcrypt.compare(plainPassword, user.password);
+  return match; //true나 false를 반환
+};
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
