@@ -66,9 +66,23 @@ export default function LandingPage() {
   const handleFilters = (newFilteredData, category) => {
     const newFilters = { ...filters }; // state의 ilters['continents]와 filters['price']
     newFilters[category] = newFilteredData;
-
+    if (category === "price") {
+      const priceValues = handlePrice(newFilteredData); // 인덱스가 들어와어 array 범위가 나옴
+      newFilters[category] = priceValues; //priceValues는 [200,299]이런 식으로 된다.
+    }
     showFilteredResults(newFilters); // 필터링 된걸 이용해서 백엔드에게 요청을 보냄
     setFilters(newFilters); // 변경된 인덱스들로 수정
+  };
+
+  const handlePrice = (value) => {
+    let array = [];
+
+    for (let key in prices) {
+      if (prices[key]._id === parseInt(value, 10)) {
+        array = prices[key].array; //[200,299] 이런식
+      }
+    }
+    return array;
   };
 
   const showFilteredResults = (filters) => {
@@ -99,7 +113,11 @@ export default function LandingPage() {
           />
         </div>
         <div className="w-1/2">
-          <RadioBox />
+          <RadioBox
+            prices={prices}
+            checkedPrice={filters.price}
+            onFilters={(filters) => handleFilters(filters, "price")}
+          />
         </div>
       </div>
 
