@@ -26,16 +26,25 @@ router.get("/", async (req, res, next) => {
   const skip = req.query.skip ? Number(req.query.skip) : 0;
   const term = req.query.searchTerm;
 
+  let findArgs = {};
+  for (let key in req.query.filters) {
+    if (req.query.filters[key].length > 0) {
+      findArgs[key] = req.query.filters[key];
+    }
+  }
+
+  console.log(findArgs);
+
   try {
     // 아무나 가져 올 수 있게 하기 위해 auth 미들웨어 사용 X
-    const products = await Product.find()
+    const products = await Product.find(findArgs)
       .populate("writer")
       .sort([[sortBy, order]])
       .skip(skip)
       .limit(limit);
 
     // 디비에 데이터 개수 확인하고 더보기 가능한지 체크
-    const productsTotal = await Product.countDocuments();
+    const productsTotal = await Product.countDocuments(findArgs);
     const hasMore = skip + limit < productsTotal ? true : false;
 
     return res.status(200).json({

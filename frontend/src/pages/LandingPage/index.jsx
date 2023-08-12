@@ -4,7 +4,7 @@ import RadioBox from "./Sections/RadioBox";
 import SearchInput from "./Sections/SearchInput";
 import CardItem from "./Sections/CardItem";
 import axiosInstance from "../../utils/axios";
-//import { continents, prices } from '../../utils/filterData'
+import { continents, prices } from "../../utils/filterData";
 
 export default function LandingPage() {
   const limit = 4; // 더 보기 버튼을 눌렀을 때 몇개의 사진을 더 보여줄지
@@ -12,8 +12,8 @@ export default function LandingPage() {
   const [skip, setSkip] = useState(0); // 처음에는 모든걸 가져와야하니 0으로 시작하고 그다음엔 +limit
   const [hasMore, setHasMore] = useState(false); // 더 가져올 데이터가 있는지 hasMore이 있을 때만 더보기 가능
   const [filters, setFilters] = useState({
-    continents: [],
-    price: [],
+    continents: [], // 각각의 인덱스가 들어간다
+    price: [], // filters['continents]와 filters['price']
   });
 
   useEffect(() => {
@@ -62,6 +62,28 @@ export default function LandingPage() {
     setSkip(skip + limit);
   };
 
+  //newFilteredData는 체크된 인덱스들    category는 continents랑 price
+  const handleFilters = (newFilteredData, category) => {
+    const newFilters = { ...filters }; // state의 ilters['continents]와 filters['price']
+    newFilters[category] = newFilteredData;
+
+    showFilteredResults(newFilters); // 필터링 된걸 이용해서 백엔드에게 요청을 보냄
+    setFilters(newFilters); // 변경된 인덱스들로 수정
+  };
+
+  const showFilteredResults = (filters) => {
+    // 필터링 된걸 이용해서 백엔드에게 요청을 보냄
+    console.log(filters);
+    const body = {
+      skip: 0, // 필터를 거치면 처음부터 다시 상품들을 생성
+      limit,
+      filters, // 체크된 사로운 인덱스들
+    };
+
+    fetchProducts(body); //백엔드로 요청
+    setSkip(0);
+  };
+
   return (
     <section>
       <div className="text-center m-7">
@@ -70,7 +92,11 @@ export default function LandingPage() {
       {/* Filter */}
       <div className="flex gap-3">
         <div className="w-1/2">
-          <CheckBox />
+          <CheckBox
+            continents={continents}
+            checkedContinents={filters.continents}
+            onFilters={(filters) => handleFilters(filters, "continents")}
+          />
         </div>
         <div className="w-1/2">
           <RadioBox />
