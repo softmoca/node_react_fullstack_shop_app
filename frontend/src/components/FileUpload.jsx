@@ -1,6 +1,7 @@
 import React from "react";
 import Dropzone from "react-dropzone";
 import axiosInstance from "../utils/axios";
+
 export default function FileUpload({ onImageChange, images }) {
   const handleDrop = async (files) => {
     let formData = new FormData(); // 파일을 전달할  때 사용
@@ -12,8 +13,8 @@ export default function FileUpload({ onImageChange, images }) {
     formData.append("file", files[0]); //file이라는 키와 files(파일들의 정보 객체) 값을 추가
 
     try {
+      // 백엔드에서 위에서 생성한 config와 formdata 보내기
       const response = await axiosInstance.post(
-        // 백엔드에서 위에서 생성한 config와 formdata 보내기
         "/products/image",
         formData,
         config
@@ -25,14 +26,14 @@ export default function FileUpload({ onImageChange, images }) {
   };
 
   const handleDelete = (image) => {
-    const currentIndex = images.indexOf(image);
-    let newImages = [...images];
-    newImages.splice(currentIndex, 1);
-    onImageChange(newImages);
+    const currentIndex = images.indexOf(image); // 이미지의 인덱스 반환
+    let newImages = [...images]; // 원본 복사
+    newImages.splice(currentIndex, 1); //currentIndex 부터 하나를 지운다.
+    onImageChange(newImages); // 지우기 작업 끝난 원본  이미지들을 다시 업데이트
   };
 
   return (
-    <div>
+    <div className="flex gap-4">
       <Dropzone onDrop={handleDrop}>
         {(
           { getRootProps, getInputProps } //Dropzone 에서 가져온 인자들
