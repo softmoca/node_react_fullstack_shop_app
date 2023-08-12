@@ -18,6 +18,19 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage }).single("file"); // 하나의 이미지를 올림
 //프론트에서 추가한 formData.append("file",files[0]) 에서 첫번째 인자와 single의 인자가 같아야함
 
+router.get("/", async (req, res, next) => {
+  try {
+    // 아무나 가져 올 수 있게 하기 위해 auth 미들웨어 사용 X
+    const products = await Product.find().populate("writer");
+
+    return res.status(200).json({
+      products,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post("/image", auth, async (req, res, next) => {
   //console.log(req);
 
