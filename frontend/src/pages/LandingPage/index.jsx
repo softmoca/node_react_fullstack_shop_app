@@ -39,10 +39,27 @@ export default function LandingPage() {
     try {
       const response = await axiosInstance.get("/products", { params }); // 백엔드에 데이터 요청
 
-      setProducts(response.data.products); // 받아온 데이터를 추가
+      if (loadMore) {
+        setProducts([...products, ...response.data.products]); //  받아온 데이터를 추가
+      } else {
+        setProducts(response.data.products);
+      }
+      setHasMore(response.data.hasMore);
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleLoadMore = () => {
+    const body = {
+      skip: skip + limit,
+      limit,
+      loadMore: true,
+      filters,
+      // searchTerm,
+    };
+    fetchProducts(body);
+    setSkip(skip + limit);
   };
 
   return (
@@ -76,7 +93,10 @@ export default function LandingPage() {
 
       {hasMore && (
         <div className="flex justify-center mt-5">
-          <button className="px-4 py-2 mt-5 text-white bg-black rounded-md hover:bg-gray-500">
+          <button
+            onClick={handleLoadMore}
+            className="px-4 py-2 mt-5 text-white bg-black rounded-md hover:bg-gray-500"
+          >
             더 보기
           </button>
         </div>

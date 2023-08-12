@@ -19,12 +19,28 @@ const upload = multer({ storage: storage }).single("file"); // 하나의 이미�
 //프론트에서 추가한 formData.append("file",files[0]) 에서 첫번째 인자와 single의 인자가 같아야함
 
 router.get("/", async (req, res, next) => {
+  // asc 오름차순  , desc 내림차순
+  const order = req.query.order ? req.query.order : "desc";
+  const sortBy = req.query.sortBy ? req.query.sortBy : "_id";
+  const limit = req.query.limit ? Number(req.query.limit) : 20;
+  const skip = req.query.skip ? Number(req.query.skip) : 0;
+  const term = req.query.searchTerm;
+
   try {
     // 아무나 가져 올 수 있게 하기 위해 auth 미들웨어 사용 X
-    const products = await Product.find().populate("writer");
+    const products = await Product.find()
+      .populate("writer")
+      .sort([[sortBy, order]])
+      .skip(skip)
+      .limit(limit);
+
+    // 디비에 데이터 개수 확인하고 더보기 가능한지 체크
+    const productsTotal = await Product.countDocuments();
+    const hasMore = skip + limit < productsTotal ? true : false;
 
     return res.status(200).json({
       products,
+      hasMore,
     });
   } catch (error) {
     next(error);
