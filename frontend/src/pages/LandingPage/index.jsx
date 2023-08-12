@@ -1,5 +1,86 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import CheckBox from "./Sections/CheckBox";
+import RadioBox from "./Sections/RadioBox";
+import SearchInput from "./Sections/SearchInput";
+import CardItem from "./Sections/CardItem";
+import axiosInstance from "../../utils/axios";
+//import { continents, prices } from '../../utils/filterData'
 
 export default function LandingPage() {
-  return <div>LandingPage</div>;
+  const limit = 4; // 더 보기 버튼을 눌렀을 때 몇개의 사진을 더 보여줄지
+  const [products, setProducts] = useState([]);
+  const [skip, setSkip] = useState(0); // 처음에는 모든걸 가져와야하니 0으로 시작하고 그다음엔 +limit
+  const [hasMore, setHasMore] = useState(false); // 더 가져올 데이터가 있는지 hasMore이 있을 때만 더보기 가능
+  const [filters, setFilters] = useState({
+    continents: [],
+    price: [],
+  });
+
+  useEffect(() => {
+    // 처음 화면에 보여줄 상품들(몽고 DB에 있는데이터)를 가져온다
+    fetchProducts({ skip, limit });
+  }, []); // 의존성 배열에 빈 배열을 넣으면 처음 렌더링시에만 가져온다
+
+  const fetchProducts = async ({
+    skip,
+    limit,
+    loadMore = false,
+    filters = {},
+    searchTerm = "",
+  }) => {
+    const params = {
+      //   객체 생성
+      skip: skip,
+      limit: limit,
+      filters: filters, //  디폴트 값 O
+      searchTerm: searchTerm, // 디폴트 값 O
+    };
+
+    try {
+      const response = await axiosInstance.get("/products", { params }); // 백엔드에 데이터 요청
+
+      setProducts(response.data.products); // 받아온 데이터를 추가
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <section>
+      <div className="text-center m-7">
+        <h2 className="text-2xl">여행 상품 사이트</h2>
+      </div>
+      {/* Filter */}
+      <div className="flex gap-3">
+        <div className="w-1/2">
+          <CheckBox />
+        </div>
+        <div className="w-1/2">
+          <RadioBox />
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="flex justify-end mb-3">
+        <SearchInput />
+      </div>
+
+      {/* Card           // 화면 크기에 따라 보여줄 카드 개수 변경의 위함 grid*/}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {products.map((product) => (
+          <CardItem product={product} key={product._id} />
+        ))}
+      </div>
+
+      {/* LoadMore 더보기  */}
+
+      {hasMore && (
+        <div className="flex justify-center mt-5">
+          <button className="px-4 py-2 mt-5 text-white bg-black rounded-md hover:bg-gray-500">
+            더 보기
+          </button>
+        </div>
+      )}
+    </section>
+  );
 }
