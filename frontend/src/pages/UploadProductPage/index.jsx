@@ -1,4 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import axiosInstance from "../../utils/axios";
+import { useNavigate } from "react-router-dom";
+//import FileUpload from "../../components/FileUpload";
 
 const continents = [
   { key: 1, value: "Africa" },
@@ -11,19 +15,63 @@ const continents = [
 ];
 
 export default function UploadProductPage() {
+  const [product, setProduct] = useState({
+    title: "",
+    description: "",
+    price: 0,
+    continents: 1,
+    images: [],
+  });
+
+  const userData = useSelector((state) => state.user?.userData); // 로그인한 사람의 정보를 redux에서 가져오기 위해
+  const navigate = useNavigate();
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setProduct((prevState) => ({
+      ...prevState, // 원래 있던 state객체
+      [name]: value, /// name 은 state의 product 각 title, description, price,continents,등등이 된다
+    }));
+  };
+
+  const handleImages = (newImages) => {
+    setProduct((prevState) => ({
+      ...prevState, // 원래 있던 state객체
+      images: newImages,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    // 백엔드에 요청을 보냄
+    event.preventDefault();
+    const body = {
+      writer: userData.id, // useSelector로 가져온 로그인한 사용자의 id
+      ...product, // state의 product의 속성을 가져온다.
+    };
+
+    try {
+      await axiosInstance.post("/products", body);
+      navigate("/"); // 상품 업로드 후  메인 페이지로 이동
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <section>
       <div className="text-center m-7">
         <h1>예상 상품 업로드</h1>
       </div>
 
-      <form className="mt-6">
+      <form className="mt-6" onSubmit={handleSubmit}>
         <div className="mt-4">
           <label htmlFor="title">이름</label>
           <input
             className="w-full px-4 py-2 bg-white border rounded-md"
             name="title"
             id="title"
+            onChange={handleChange}
+            value={product.title}
           />
         </div>
 
@@ -33,6 +81,8 @@ export default function UploadProductPage() {
             className="w-full px-4 py-2 bg-white border rounded-md"
             name="description"
             id="description"
+            onChange={handleChange}
+            value={product.description}
           />
         </div>
 
@@ -43,6 +93,8 @@ export default function UploadProductPage() {
             type="number"
             name="price"
             id="price"
+            onChange={handleChange}
+            value={product.price}
           />
         </div>
 
@@ -52,6 +104,8 @@ export default function UploadProductPage() {
             className="w-full px-4 py-2 mt-2 bg-white border rounded-md"
             name="continents"
             id="continents"
+            onChange={handleChange}
+            value={product.continents}
           >
             {continents.map((item) => (
               <option key={item.key} value={item.key}>
