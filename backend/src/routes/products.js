@@ -42,7 +42,9 @@ router.get("/", async (req, res, next) => {
       }
     }
   }
-
+  if (term) {
+    findArgs["$text"] = { $search: term };
+  }
   console.log(findArgs);
 
   try {

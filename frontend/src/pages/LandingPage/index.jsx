@@ -16,6 +16,8 @@ export default function LandingPage() {
     price: [], // filters['continents]와 filters['price']
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
     // 처음 화면에 보여줄 상품들(몽고 DB에 있는데이터)를 가져온다
     fetchProducts({ skip, limit });
@@ -56,7 +58,7 @@ export default function LandingPage() {
       limit,
       loadMore: true,
       filters,
-      // searchTerm,
+      searchTerm,
     };
     fetchProducts(body);
     setSkip(skip + limit);
@@ -92,10 +94,23 @@ export default function LandingPage() {
       skip: 0, // 필터를 거치면 처음부터 다시 상품들을 생성
       limit,
       filters, // 체크된 사로운 인덱스들
+      searchTerm,
     };
 
     fetchProducts(body); //백엔드로 요청
     setSkip(0);
+  };
+
+  const handleSearchTerm = (event) => {
+    const body = {
+      skip: 0,
+      limit,
+      filters,
+      searchTerm: event.target.value,
+    };
+    setSkip(0);
+    setSearchTerm(event.target.value);
+    fetchProducts(body);
   };
 
   return (
@@ -123,7 +138,7 @@ export default function LandingPage() {
 
       {/* Search */}
       <div className="flex justify-end mb-3">
-        <SearchInput />
+        <SearchInput searchTerm={searchTerm} onSearch={handleSearchTerm} />
       </div>
 
       {/* Card           // 화면 크기에 따라 보여줄 카드 개수 변경의 위함 grid*/}
