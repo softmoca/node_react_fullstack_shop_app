@@ -4,6 +4,8 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
 const async = require("async");
+const Product = require("../models/Product");
+const Payment = require("../models/Payment");
 
 router.get("/auth", auth, async (req, res, next) => {
   return res.json({
@@ -108,6 +110,36 @@ router.post("/cart", auth, async (req, res, next) => {
 
       return res.status(201).send(user.cart);
     }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/cart", auth, async (req, res, next) => {
+  try {
+    // 먼저 cart안에 지우려고 한 상품을 지워주기
+    const userInfo = await User.findOneAndUpdate(
+      { _id: req.user._id },
+      {
+        // 없애기
+        $pull: { cart: { id: req.query.productId } },
+      },
+      { new: true }
+    );
+
+    const cart = userInfo.cart;
+    const array = cart.map((item) => {
+      return item.id;
+    });
+
+    const productInfo = await Product.find({ _id: { $in: array } }).populate(
+      "writer"
+    );
+
+    return res.json({
+      productInfo,
+      cart,
+    });
   } catch (error) {
     next(error);
   }

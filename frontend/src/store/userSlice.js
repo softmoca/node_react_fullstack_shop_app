@@ -6,6 +6,7 @@ import {
   authUser,
   addToCart,
   getCartItems,
+  removeCartItem,
 } from "./thunkFunctions";
 import { toast } from "react-toastify";
 const initialState = {
@@ -104,6 +105,20 @@ const userSlice = createSlice({
         state.cartDetail = action.payload;
       })
       .addCase(getCartItems.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        toast.error(action.payload);
+      })
+      .addCase(removeCartItem.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(removeCartItem.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.cartDetail = action.payload.productInfo;
+        state.userData.cart = action.payload.cart;
+        toast.info("상품이 장바구니에서 제거되었습니다.");
+      })
+      .addCase(removeCartItem.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
         toast.error(action.payload);
