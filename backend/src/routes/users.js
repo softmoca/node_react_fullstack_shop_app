@@ -3,8 +3,8 @@ const User = require("../models/User");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
-const async = require("async");
 const Product = require("../models/Product");
+const async = require("async");
 const Payment = require("../models/Payment");
 
 router.get("/auth", auth, async (req, res, next) => {
@@ -143,6 +143,65 @@ router.delete("/cart", auth, async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+router.post("/payment", auth, async (req, res) => {
+  // User Collection 안에 History 필드 안에 간단한 결제 정보 넣어주기
+  let history = [];
+  let transactionData = {};
+
+  req.body.cartDetail.forEach((item) => {
+    //
+    history.push({
+      dateOfPurchase: new Date().toISOString(),
+      name: item.title,
+      id: item._id,
+      price: item.price,
+      quantity: item.quantity,
+      paymentId: 1233321, // 랜던함 수를 줘야하지만 우선 아무값 넣음
+    });
+  });
+
+  // Payment Collection 안에 자세한 결제 정보들 넣어주기
+  transactionData.user = {
+    id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+  };
+  transactionData.product = history;
+
+  // user collection
+  await User.findOneAndUpdate(
+    { _id: req.user._id },
+    { $push: { history: { $each: history } }, $set: { cart: [] } }
+  );
+
+  // payment collection
+  const payment = new Payment(transactionData);
+  const paymentDocs = await payment.save();
+
+  let products = [];
+  paymentDocs.product.forEach((item) => {
+    products.push({ id: item.id, quantity: item.quantity });
+  });
+  //async 라이브러리 함수 사용
+  async.eachSeries(
+    products,
+    async (item) => {
+      await Product.updateOne(
+        { _id: item.id },
+        {
+          $inc: {
+            sold: item.quantity,
+          },
+        }
+      );
+    },
+    (err) => {
+      if (err) return res.status(500).send(err);
+      return res.sendStatus(200);
+    }
+  );
 });
 
 module.exports = router;
