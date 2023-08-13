@@ -18,6 +18,34 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage }).single("file"); // 하나의 이미지를 올림
 //프론트에서 추가한 formData.append("file",files[0]) 에서 첫번째 인자와 single의 인자가 같아야함
 
+router.post("/image", auth, async (req, res, next) => {
+  //console.log(req);
+
+  upload(req, res, (err) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+
+    return res.json({ fileName: res.req.file.filename });
+  });
+});
+
+router.get("/:id", async (req, res, next) => {
+  const type = req.query.type;
+  let productIds = req.params.id;
+
+  //  productId를 이용해서 DB에서 productID와 같은 상품을 가져온다
+
+  try {
+    const product = await Product.find({ _id: { $in: productIds } }) // 여러개의 상품 id를 사용하기위해
+      .populate("writer");
+
+    return res.status(200).send(product);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/", async (req, res, next) => {
   // asc 오름차순  , desc 내림차순
   const order = req.query.order ? req.query.order : "desc";
@@ -31,10 +59,9 @@ router.get("/", async (req, res, next) => {
     if (req.query.filters[key].length > 0) {
       if (key === "price") {
         findArgs[key] = {
-          //Greater than equal
-          $gte: req.query.filters[key][0],
-          //Less than equal
-          $lte: req.query.filters[key][1],
+          $gte: req.query.filters[key][0], //Greater than equal
+
+          $lte: req.query.filters[key][1], //Less than equal
         };
       } else {
         //continent
@@ -66,18 +93,6 @@ router.get("/", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
-
-router.post("/image", auth, async (req, res, next) => {
-  //console.log(req);
-
-  upload(req, res, (err) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-
-    return res.json({ fileName: res.req.file.filename });
-  });
 });
 
 router.post("/", auth, async (req, res, next) => {
