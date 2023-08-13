@@ -34,6 +34,16 @@ router.get("/:id", async (req, res, next) => {
   const type = req.query.type;
   let productIds = req.params.id;
 
+  if (type === "array") {
+    // id=32423423423,345345345345345,345345345
+    // productIds = ['32423423423', '345345345345345345', '345345345345345']
+
+    let ids = productIds.split(",");
+    productIds = ids.map((item) => {
+      return item;
+    });
+  }
+
   //  productId를 이용해서 DB에서 productID와 같은 상품을 가져온다
 
   try {

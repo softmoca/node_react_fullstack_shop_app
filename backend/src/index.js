@@ -5,6 +5,13 @@ const cors = require("cors");
 const app = express();
 const port = 4000;
 const dotenv = require("dotenv");
+app.use(cors());
+
+let corsOptions = {
+  origin: "http://localhost:5173/",
+  credentials: true,
+};
+
 dotenv.config();
 
 app.use(cors());
