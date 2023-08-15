@@ -54,6 +54,9 @@
 - extraRudecers
 - createAsyncThunk
 
+### 비동기 데이터 처리
+- axios
+
 
 ### 주요 Hooks 라이브러리
 - react-hook-form
@@ -67,9 +70,7 @@
 
 - Tailwind CSS
 
-### 비동기 데이터 처리
 
-- axios
 <br/>
 <br/>
 
